@@ -94,7 +94,7 @@ public class MemoryManagementUnit {
                 }
             }  
             
-            System.out.println(pageNumber+" "+removePos);   
+           
             pageTable[removePos].setValidBit(false);
             
             
