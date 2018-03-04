@@ -3,6 +3,7 @@ import java.util.LinkedList;
 public class MemoryManagementUnit {
     /** The page table */
     private PageTableEntry[] pageTable;
+    private int removePos;
     
     /** How many bits of logical memory addresses are used for the offset */
     private int bitsForOffset;
@@ -33,7 +34,7 @@ public class MemoryManagementUnit {
         
         
         pageTable = new PageTableEntry[pageTableSize];
-        
+        removePos = 0;
         // Initialise all the page table entries to invalid, by making default page table entries
         for (int i = 0; i < pageTableSize; ++i) {
             pageTable[i] = new PageTableEntry();
@@ -58,7 +59,7 @@ public class MemoryManagementUnit {
         if (pageTable[pageNumber].getValidBit()) {
             // no page fault, woot
             // set the reference bit            
-            pageTable[pageNumber].setReferenceBit(true);            
+            pageTable[pageNumber].setReferenceBit(true); 
             return false; // no page fault - return false
         } else {
             pageFaultHandler(pageNumber);
@@ -76,7 +77,30 @@ public class MemoryManagementUnit {
         // TODO: your code goes here
         // Implement the second-chance page-fault handler algorithm
         // (Don't forget to check if there is a free frame)
-
+        if(freeFrames.size() > 0){
+        
+            pageTable[pageNumber] = new PageTableEntry(freeFrames.removeFirst());
+            pageTable[pageNumber].setValidBit(true);
+        }   
+        else{
+            
+            while(!pageTable[removePos].getValidBit() || pageTable[removePos].getReferenceBit())//Only stops when the page can actually be swapped out
+            {
+                pageTable[removePos].setReferenceBit(false);
+                removePos++;
+                if(removePos >= pageTable.length-1){
+                
+                    removePos = 0;    
+                }
+            }  
+            
+            System.out.println(pageNumber+" "+removePos);   
+            pageTable[removePos].setValidBit(false);
+            
+            
+            pageTable[pageNumber] = new PageTableEntry(pageTable[removePos].getAddress());
+        }
+        
         
     }
 }
